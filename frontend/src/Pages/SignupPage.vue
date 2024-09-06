@@ -80,6 +80,9 @@ export default {
 <style scoped>
 .v-card {
   padding: 20px;
+  border-width: 3px;
+  border-color: #bdbdbd;
+  margin-top: 200px;
 }
 .headline,
 .subtitle,

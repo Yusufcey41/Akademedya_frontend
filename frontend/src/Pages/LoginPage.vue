@@ -64,6 +64,8 @@ export default {
 <style scoped>
 .v-card {
   padding: 20px;
+  border-width: 3px;
+  border-color: #bdbdbd;
 }
 .headline,
 .subtitle,
@@ -75,7 +77,7 @@ export default {
 }
 .mx-auto {
   width: 600px;
-  margin-bottom: 250px;
+  margin-bottom: 170px;
 }
 .loginbutton {
   left: 35%;

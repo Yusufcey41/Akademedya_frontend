@@ -1,6 +1,18 @@
 <template>
   <div class="div-table-name">
-    Tablo adı:<input type="text" placeholder="tablo adı giriniz" class="input-table-name" />
+    Tablo adı:
+    <input type="text" placeholder="tablo adı giriniz" class="input-table-name" />
+    <input
+      type="file"
+      id="fileInput"
+      @change="handleFileChange"
+      accept="image/*"
+      ref="fileInput"
+      style="display: none"
+    />
+    <button class="select-photo" @click="triggerFileInput">Fotoğraf Seç</button>
+    <p>Fotoğraf Adı: {{ fileName }}</p>
+    <!-- Fotoğraf ismini gösterir -->
   </div>
 
   <div class="table-container">
@@ -28,8 +40,9 @@
             />
           </div>
         </div>
-        <div class="div-add-btn-row">
+        <div class="flex-horizantal-buttons">
           <button class="add-btn-row" @click="addRow">+</button>
+          <button class="add-btn-row" @click="removeRow">-</button>
         </div>
         <div class="save-btn-div">
           <button class="save-btn" @click="saveTable">Save</button>
@@ -37,6 +50,7 @@
       </div>
       <div class="full-row">
         <button class="add-btn-col" @click="addColumn">+</button>
+        <button class="add-btn-col" @click="removecolumn">-</button>
       </div>
     </div>
   </div>
@@ -49,20 +63,51 @@ export default {
       columnCount: 1,
       rowCount: 1,
       headers: [''],
-      rows: [['']]
+      rows: [['']],
+      imageUrl: null, // Seçilen fotoğrafın URL'si burada saklanacak
+      fileName: '' // Seçilen fotoğrafın adı burada saklanacak
     }
   },
   methods: {
+    handleFileChange(event) {
+      const file = event.target.files[0] // İlk dosyayı al
+      if (file) {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          this.imageUrl = e.target.result // Fotoğrafın verilerini imageUrl'e ata
+        }
+        reader.readAsDataURL(file) // Fotoğrafı veri URL'si olarak oku
+
+        this.fileName = file.name // Fotoğrafın ismini fileName değişkenine ata
+      }
+    },
+    triggerFileInput() {
+      this.$refs.fileInput.click() // Dosya seçme inputunu tıklatır
+    },
     addColumn() {
       this.columnCount++
       this.headers.push(``)
       this.rows.forEach((row) => row.push(''))
     },
+    removecolumn() {
+      if (this.columnCount > 1) {
+        this.columnCount--
+        this.headers.pop('')
+        this.rows.forEach((row) => row.pop(''))
+      }
+    },
     addRow() {
       this.rowCount++
       this.rows.push(Array(this.columnCount).fill(''))
     },
+    removeRow() {
+      if (this.rowCount > 1) {
+        this.rowCount--
+        this.rows.pop()
+      }
+    },
     saveTable() {
+      console.log(this.headers[0])
       console.log(this.rows)
     }
   }
@@ -80,10 +125,20 @@ export default {
 }
 .full-row {
   display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 60px;
 }
 .div-add-btn-row {
   display: flex;
   height: 30px;
+}
+.flex-horizantal-buttons {
+  display: flex;
+  padding-left: 30px;
+  padding-right: 5px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 .tableBody {
   display: flex;
@@ -135,14 +190,15 @@ export default {
   border: 1px solid #ddd;
   padding: 5px;
   border-radius: 10px;
+  background-color: rgb(248, 245, 245);
 }
 
 .add-btn-col {
+  flex: 1;
   cursor: pointer;
   background-color: rgb(226, 223, 223);
   border: 2px solid black;
   padding: 5px;
-  margin-bottom: 60px;
 }
 .add-btn-col:hover {
   background-color: rgb(236, 234, 234);
@@ -151,8 +207,6 @@ export default {
 .add-btn-row {
   width: 100%;
   height: 25px;
-  margin-left: 30px;
-  margin-right: 5px;
   cursor: pointer;
   background-color: rgb(226, 223, 223);
   border: 2px solid black;
@@ -163,8 +217,8 @@ export default {
 }
 .input-table-name {
   border: 1px solid #ddd;
-  border-radius: 10px;
-  margin-bottom: 20px;
+  border-radius: 15px;
+  margin-top: 20px;
   margin-left: 10px;
   height: 35px;
 }
@@ -173,8 +227,21 @@ export default {
   padding-left: 10px;
 }
 .div-table-name {
+  display: flex;
+  align-items: center; /* Yatay ortalama sağlar */
+  text-align: center; /* Metinlerin ortalanmasını sağlar */
   margin-left: 50px;
   margin-top: 20px;
+  gap: 20px;
+}
+
+.input-table-name {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  height: 35px;
+  width: 80%; /* Genişliği biraz küçültmek için ayarlayın */
+  max-width: 400px; /* Maksimum genişlik belirleyin */
 }
 .save-btn {
   background-color: #caf7ca;
@@ -183,5 +250,32 @@ export default {
 }
 .save-btn-div {
   margin-left: 30px;
+}
+.select-photo {
+  background-color: #4caf50; /* Buton rengi */
+  border: none; /* Kenarlık kaldırma */
+  color: white; /* Metin rengi */
+  padding: 10px 20px; /* İç boşluk */
+  text-align: center; /* Metin hizalaması */
+  text-decoration: none; /* Alt çizgi kaldırma */
+  display: inline-block; /* Butonun yan yana olması için */
+  font-size: 16px; /* Yazı boyutu */
+  margin: 10px 0; /* Butonlar arasında boşluk */
+  cursor: pointer; /* Fare imlecini değiştirir */
+  border-radius: 5px; /* Kenarları yuvarlatır */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Hafif gölge ekler */
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease; /* Geçiş efekti */
+}
+
+.select-photo:hover {
+  background-color: #45a049; /* Hover durumunda buton rengi */
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Hover durumunda gölge */
+}
+
+.select-photo:focus {
+  outline: none; /* Fokus durumunda kenarlık kaldırma */
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.3); /* Fokus durumunda kenarlık */
 }
 </style>

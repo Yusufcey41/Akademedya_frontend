@@ -1,10 +1,11 @@
 <template>
   <v-toolbar density="compact">
     <!-- <v-app-bar-nav-icon></v-app-bar-nav-icon> -->
+    <v-spacer></v-spacer>
     <v-btn v-if="isLoggedIn" to="/createtable">
       <v-toolbar-title><a>Create Table</a></v-toolbar-title>
     </v-btn>
-    <v-btn v-if="isLoggedIn" to="/listtable">
+    <v-btn v-if="isLoggedIn" to="/listtable" class="ms-12">
       <v-toolbar-title><a>List Table</a></v-toolbar-title>
     </v-btn>
     <v-spacer></v-spacer>
@@ -13,7 +14,8 @@
     <v-btn v-if="isLoggedIn" icon>
       <v-icon>mdi-account</v-icon>
     </v-btn>
-    <v-btn v-if="isLoggedIn" to="/login" @click="handlelogout" icon>
+    {{}}
+    <v-btn v-if="isLoggedIn" to="/login" @click="handlelogout" icon style="margin-left: 8px">
       <v-icon>mdi-export</v-icon>
     </v-btn>
   </v-toolbar>
@@ -60,4 +62,4 @@ export default {
 }
 </script>
 
-<style scoped></style>
+<style></style>
