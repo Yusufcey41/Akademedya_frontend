@@ -1,14 +1,18 @@
-/* eslint-env node */
-require('@rushstack/eslint-patch/modern-module-resolution')
-
-module.exports = {
+export default {
   root: true,
-  'extends': [
-    'plugin:vue/vue3-essential',
+  env: {
+    browser: true,
+    es2021: true,
+  },
+  extends: [
     'eslint:recommended',
-    '@vue/eslint-config-prettier/skip-formatting'
+    'plugin:vue/vue3-essential', 
   ],
   parserOptions: {
-    ecmaVersion: 'latest'
-  }
-}
+    ecmaVersion: 2020,
+    sourceType: 'module',
+  },
+  rules: {
+    'vue/v-slot-style': ['error', { name: 'kebab', props: 'as-needed' }],
+  },
+};
