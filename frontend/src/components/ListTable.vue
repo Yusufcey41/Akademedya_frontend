@@ -119,121 +119,109 @@
   </v-container>
 </template>
 
-<script>
-export default {
-  data: () => ({
-    dialog: false,
-    dialogDelete: false,
-    selectedTable: null,
-    headers1: [
-      { title: 'Dessert (100g serving)', key: 'name' },
-      { title: 'Calories', key: 'calories' },
-      { title: 'Fat (g)', key: 'fat' },
-      { title: 'Carbs (g)', key: 'carbs' },
-      { title: 'Protein (g)', key: 'protein' },
-      { title: 'Actions', key: 'actions', sortable: false }
-    ],
-    headers2: [
-      { title: 'Item', key: 'name' },
-      { title: 'Quantity', key: 'calories' },
-      { title: 'Cost', key: 'fat' },
-      { title: 'Stock', key: 'carbs' },
-      { title: 'Supplier', key: 'protein' },
-      { title: 'Actions', key: 'actions', sortable: false }
-    ],
-    desserts1: [
-      { name: 'Frozen Yogurt', calories: 159, fat: 6.0, carbs: 24, protein: 4.0 },
-      { name: 'Ice cream sandwich', calories: 237, fat: 9.0, carbs: 37, protein: 4.3 }
-    ],
-    desserts2: [
-      { name: 'Apples', calories: 100, fat: 0, carbs: 20, protein: 1.0 },
-      { name: 'Bananas', calories: 150, fat: 0, carbs: 30, protein: 1.0 }
-    ],
-    editedIndex: -1,
-    editedItem: {
-      name: '',
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0
-    },
-    defaultItem: {
-      name: '',
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0
-    }
-  }),
+<script setup>
+import { ref, computed, nextTick } from 'vue'
 
-  computed: {
-    currentHeaders() {
-      return this.selectedTable === 1 ? this.headers1 : this.headers2
-    },
-    currentDesserts() {
-      return this.selectedTable === 1 ? this.desserts1 : this.desserts2
-    },
-    formTitle() {
-      return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
-    },
-    tableTitle() {
-      return this.selectedTable === 1 ? 'Table 1' : 'Table 2'
-    }
-  },
+const dialog = ref(false)
+const dialogDelete = ref(false)
+const selectedTable = ref(null)
+const headers1 = [
+  { title: 'Dessert (100g serving)', key: 'name' },
+  { title: 'Calories', key: 'calories' },
+  { title: 'Fat (g)', key: 'fat' },
+  { title: 'Carbs (g)', key: 'carbs' },
+  { title: 'Protein (g)', key: 'protein' },
+  { title: 'Actions', key: 'actions', sortable: false }
+]
+const headers2 = [
+  { title: 'Item', key: 'name' },
+  { title: 'Quantity', key: 'calories' },
+  { title: 'Cost', key: 'fat' },
+  { title: 'Stock', key: 'carbs' },
+  { title: 'Supplier', key: 'protein' },
+  { title: 'Actions', key: 'actions', sortable: false }
+]
+const desserts1 = ref([
+  { name: 'Frozen Yogurt', calories: 159, fat: 6.0, carbs: 24, protein: 4.0 },
+  { name: 'Ice cream sandwich', calories: 237, fat: 9.0, carbs: 37, protein: 4.3 }
+])
+const desserts2 = ref([
+  { name: 'Apples', calories: 100, fat: 0, carbs: 20, protein: 1.0 },
+  { name: 'Bananas', calories: 150, fat: 0, carbs: 30, protein: 1.0 }
+])
+const editedIndex = ref(-1)
+const editedItem = ref({
+  name: '',
+  calories: 0,
+  fat: 0,
+  carbs: 0,
+  protein: 0
+})
+const defaultItem = {
+  name: '',
+  calories: 0,
+  fat: 0,
+  carbs: 0,
+  protein: 0
+}
 
-  methods: {
-    selectTable(tableNumber) {
-      this.selectedTable = tableNumber
-    },
+const currentHeaders = computed(() => (selectedTable.value === 1 ? headers1 : headers2))
+const currentDesserts = computed(() =>
+  selectedTable.value === 1 ? desserts1.value : desserts2.value
+)
+const formTitle = computed(() => (editedIndex.value === -1 ? 'New Item' : 'Edit Item'))
+const tableTitle = computed(() => (selectedTable.value === 1 ? 'Table 1' : 'Table 2'))
 
-    editItem(item) {
-      this.editedIndex = this.currentDesserts.indexOf(item)
-      this.editedItem = Object.assign({}, item)
-      this.dialog = true
-    },
+function selectTable(tableNumber) {
+  selectedTable.value = tableNumber
+}
 
-    deleteItem(item) {
-      this.editedIndex = this.currentDesserts.indexOf(item)
-      this.editedItem = Object.assign({}, item)
-      this.dialogDelete = true
-    },
+function editItem(item) {
+  editedIndex.value = currentDesserts.value.indexOf(item)
+  editedItem.value = { ...item }
+  dialog.value = true
+}
 
-    deleteItemConfirm() {
-      this.currentDesserts.splice(this.editedIndex, 1)
-      this.closeDelete()
-    },
+function deleteItem(item) {
+  editedIndex.value = currentDesserts.value.indexOf(item)
+  editedItem.value = { ...item }
+  dialogDelete.value = true
+}
 
-    close() {
-      this.dialog = false
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem)
-        this.editedIndex = -1
-      })
-    },
+function deleteItemConfirm() {
+  currentDesserts.value.splice(editedIndex.value, 1)
+  closeDelete()
+}
 
-    closeDelete() {
-      this.dialogDelete = false
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem)
-        this.editedIndex = -1
-      })
-    },
+function close() {
+  dialog.value = false
+  nextTick(() => {
+    editedItem.value = { ...defaultItem }
+    editedIndex.value = -1
+  })
+}
 
-    save() {
-      if (this.editedIndex > -1) {
-        Object.assign(this.currentDesserts[this.editedIndex], this.editedItem)
-      } else {
-        this.currentDesserts.push(this.editedItem)
-      }
-      this.close()
-    },
+function closeDelete() {
+  dialogDelete.value = false
+  nextTick(() => {
+    editedItem.value = { ...defaultItem }
+    editedIndex.value = -1
+  })
+}
 
-    initialize() {
-      this.desserts = [
-        { name: 'Frozen Yogurt', calories: 159, fat: 6.0, carbs: 24, protein: 4.0 },
-        { name: 'Ice cream sandwich', calories: 237, fat: 9.0, carbs: 37, protein: 4.3 }
-      ]
-    }
+function save() {
+  if (editedIndex.value > -1) {
+    Object.assign(currentDesserts.value[editedIndex.value], editedItem.value)
+  } else {
+    currentDesserts.value.push(editedItem.value)
   }
+  close()
+}
+
+function initialize() {
+  desserts1.value = [
+    { name: 'Frozen Yogurt', calories: 159, fat: 6.0, carbs: 24, protein: 4.0 },
+    { name: 'Ice cream sandwich', calories: 237, fat: 9.0, carbs: 37, protein: 4.3 }
+  ]
 }
 </script>

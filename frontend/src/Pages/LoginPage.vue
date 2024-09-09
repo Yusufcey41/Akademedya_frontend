@@ -38,26 +38,18 @@
   </v-app>
 </template>
 
-<script>
+<script setup>
 import EventBus from '../eventBus.js'
+import { ref } from 'vue'
 
-export default {
-  name: 'LoginPage',
-  data() {
-    return {
-      email: '',
-      password: ''
-    }
-  },
-  methods: {
-    submit() {
-      alert(`Email: ${this.email}, Password: ${this.password}`)
-    },
-    handleLogin() {
-      EventBus.emit('userLoggedIn')
-    }
-  },
-  components: {}
+const email = ref('')
+const password = ref('')
+
+function submit() {
+  alert(`Email: ${email.value}, Password: ${password.value}`)
+}
+function handleLogin() {
+  EventBus.emit('userLoggedIn')
 }
 </script>
 

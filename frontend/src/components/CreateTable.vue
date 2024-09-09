@@ -50,67 +50,71 @@
       </div>
       <div class="full-row">
         <button class="add-btn-col" @click="addColumn">+</button>
-        <button class="add-btn-col" @click="removecolumn">-</button>
+        <button class="add-btn-col" @click="removeColumn">-</button>
       </div>
     </div>
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      columnCount: 1,
-      rowCount: 1,
-      headers: [''],
-      rows: [['']],
-      imageUrl: null, // Seçilen fotoğrafın URL'si burada saklanacak
-      fileName: '' // Seçilen fotoğrafın adı burada saklanacak
-    }
-  },
-  methods: {
-    handleFileChange(event) {
-      const file = event.target.files[0] // İlk dosyayı al
-      if (file) {
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          this.imageUrl = e.target.result // Fotoğrafın verilerini imageUrl'e ata
-        }
-        reader.readAsDataURL(file) // Fotoğrafı veri URL'si olarak oku
+<script setup>
+import { ref } from 'vue'
 
-        this.fileName = file.name // Fotoğrafın ismini fileName değişkenine ata
-      }
-    },
-    triggerFileInput() {
-      this.$refs.fileInput.click() // Dosya seçme inputunu tıklatır
-    },
-    addColumn() {
-      this.columnCount++
-      this.headers.push(``)
-      this.rows.forEach((row) => row.push(''))
-    },
-    removecolumn() {
-      if (this.columnCount > 1) {
-        this.columnCount--
-        this.headers.pop('')
-        this.rows.forEach((row) => row.pop(''))
-      }
-    },
-    addRow() {
-      this.rowCount++
-      this.rows.push(Array(this.columnCount).fill(''))
-    },
-    removeRow() {
-      if (this.rowCount > 1) {
-        this.rowCount--
-        this.rows.pop()
-      }
-    },
-    saveTable() {
-      console.log(this.headers[0])
-      console.log(this.rows)
+const columnCount = ref(1)
+const rowCount = ref(1)
+const headers = ref([''])
+const rows = ref([['']])
+const imageUrl = ref(null)
+const fileName = ref('')
+const fileInput = ref(null)
+
+function handleFileChange(event) {
+  const file = event.target.files[0]
+  if (file) {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      imageUrl.value = e.target.result
     }
+    reader.readAsDataURL(file)
+
+    fileName.value = file.name
   }
+}
+
+function triggerFileInput() {
+  if (fileInput.value) {
+    fileInput.value.click()
+  }
+}
+
+function addColumn() {
+  columnCount.value++
+  headers.value.push('')
+  rows.value.forEach((row) => row.push(''))
+}
+
+function removeColumn() {
+  if (columnCount.value > 1) {
+    columnCount.value--
+    headers.value.pop()
+    rows.value.forEach((row) => row.pop())
+  }
+}
+
+function addRow() {
+  rowCount.value++
+  rows.value.push(Array(columnCount.value).fill(''))
+}
+
+function removeRow() {
+  if (rowCount.value > 1) {
+    rowCount.value--
+    rows.value.pop()
+  }
+}
+
+function saveTable() {
+  console.log(headers.value[0])
+  console.log(rows.value)
 }
 </script>
 

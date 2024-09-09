@@ -21,45 +21,45 @@
   </v-toolbar>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRoute } from 'vue-router'
 import EventBus from '../eventBus.js'
 
-export default {
-  name: 'PageHeader',
-  data() {
-    return {
-      isLoggedIn: false,
-      isSignedUp: false
-    }
-  },
-  computed: {
-    isLoginPage() {
-      return this.$route.path === '/login' || this.$route.path === '/'
-    },
-    isSignUpPage() {
-      return this.$route.path === '/signup'
-    }
-  },
-  created() {
-    EventBus.on('userLoggedIn', () => {
-      this.isLoggedIn = true
-      this.isSignedUp = true
-    })
-    EventBus.on('userSignUp', () => {
-      this.isLoggedIn = false
-      this.isSignedUp = true
-    })
-    EventBus.on('userLogOut', () => {
-      this.isLoggedIn = false
-      this.isSignedUp = true
-    })
-  },
-  methods: {
-    handlelogout() {
-      EventBus.emit('userLogOut')
-    }
-  }
+// Reactive state
+const isLoggedIn = ref(false)
+const isSignedUp = ref(false)
+
+const route = useRoute()
+
+const isLoginPage = computed(() => route.path === '/login' || route.path === '/')
+const isSignUpPage = computed(() => route.path === '/signup')
+
+function handleLogout() {
+  EventBus.emit('userLogOut')
 }
+
+function setupEventListeners() {
+  EventBus.on('userLoggedIn', () => {
+    isLoggedIn.value = true
+    isSignedUp.value = true
+  })
+  EventBus.on('userSignUp', () => {
+    isLoggedIn.value = false
+    isSignedUp.value = true
+  })
+  EventBus.on('userLogOut', () => {
+    isLoggedIn.value = false
+    isSignedUp.value = true
+  })
+}
+
+onMounted(setupEventListeners)
+onUnmounted(() => {
+  EventBus.off('userLoggedIn')
+  EventBus.off('userSignUp')
+  EventBus.off('userLogOut')
+})
 </script>
 
 <style></style>
