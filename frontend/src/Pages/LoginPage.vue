@@ -7,10 +7,10 @@
         <v-card-text>
           <v-form @submit.prevent="submit">
             <v-text-field
-              v-model="email"
-              prepend-inner-icon="mdi-mail"
-              label="Email"
-              type="email"
+              v-model="userid"
+              prepend-inner-icon="mdi-account"
+              label="user id"
+              type="text"
               required
             ></v-text-field>
             <v-text-field
@@ -20,12 +20,7 @@
               type="password"
               required
             ></v-text-field>
-            <v-btn
-              class="loginbutton"
-              color="primary"
-              type="submit"
-              @click="handleLogin"
-              to="/listtable"
+            <v-btn class="loginbutton" color="primary" type="submit" @click="handleLogin"
               >Login
             </v-btn>
             <div class="signuplink-text">
@@ -41,15 +36,53 @@
 <script setup>
 import EventBus from '../eventBus.js'
 import { ref } from 'vue'
+import axios from 'axios'
+import { useRouter } from 'vue-router'
 
-const email = ref('')
+const router = useRouter()
+const userid = ref('')
 const password = ref('')
-
+const isUser = false
 function submit() {
-  alert(`Email: ${email.value}, Password: ${password.value}`)
+  //console.log(`userid: ${userid.value}, Password: ${password.value}`)
 }
-function handleLogin() {
-  EventBus.emit('userLoggedIn')
+async function handleLogin() {
+  const data = {
+    userid: userid.value,
+    password: password.value
+  }
+
+  try {
+    const response = await axios.post('http://localhost:5177/api/Auth/login', data)
+
+    if (response.data == 'yok') {
+      alert('kullanıcı mevcut değil')
+      return
+    }
+    if (response.data == 'wrong') {
+      alert('hatalı şifre')
+      return
+    }
+
+    if (!response.data) {
+      alert('aktif değilsin')
+      return
+    }
+    if (response.status === 200) {
+      const token = response.data.token
+      sessionStorage.setItem('token', token)
+      sessionStorage.setItem('id', userid.value)
+      EventBus.emit('whoLoggedIn', response.data.firstname)
+
+      EventBus.emit('userLoggedIn')
+      router.push('/createtable')
+    } else {
+      alert('Login failed: ' + response.data)
+    }
+  } catch (error) {
+    console.error('Login failed:', error)
+    alert('Login failed: ' + error.message)
+  }
 }
 </script>
 

@@ -1,7 +1,12 @@
 <template>
   <div class="div-table-name">
     Tablo adı:
-    <input type="text" placeholder="tablo adı giriniz" class="input-table-name" />
+    <input
+      v-model="tablename"
+      type="text"
+      placeholder="tablo adı giriniz"
+      class="input-table-name"
+    />
     <input
       type="file"
       id="fileInput"
@@ -58,14 +63,23 @@
 
 <script setup>
 import { ref } from 'vue'
+import axios from 'axios'
 
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 const columnCount = ref(1)
 const rowCount = ref(1)
 const headers = ref([''])
 const rows = ref([['']])
+const allRows = ref([])
 const imageUrl = ref(null)
 const fileName = ref('')
 const fileInput = ref(null)
+const tablename = ref('')
+const imagepath =
+  'C:\\Users\\cylny\\OneDrive - Kocaeli Universitesi Uzaktan Egitim Merkezi\\Masaüstü\\akademedya_resimler\\'
+const tableIds = ref([])
 
 function handleFileChange(event) {
   const file = event.target.files[0]
@@ -79,7 +93,20 @@ function handleFileChange(event) {
     fileName.value = file.name
   }
 }
+function uploadFile(file, filePath) {
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('path', filePath)
 
+  axios
+    .post('http://localhost:5177/api/UploadFile', formData)
+    .then((response) => {
+      console.log('File uploaded successfully:', response.data)
+    })
+    .catch((error) => {
+      console.error('File upload failed:', error)
+    })
+}
 function triggerFileInput() {
   if (fileInput.value) {
     fileInput.value.click()
@@ -111,10 +138,81 @@ function removeRow() {
     rows.value.pop()
   }
 }
+async function saveColumns(tableId, headers) {
+  for (const [index, value] of Object.entries(headers)) {
+    const data = {
+      TableId: tableId,
+      ColumnId: parseInt(index) + 1, // 1'den başlıyor
+      ColumnName: value
+    }
+    console.log(data)
+    try {
+      const response = await axios.post(`http://localhost:5177/api/Columns/addcolumn`, data)
+      console.log(response)
+    } catch (error) {
+      console.error('columns saving failed', error)
+    }
+  }
+}
+async function saveRows(tableId, rows) {
+  let areidCounter = 1
 
-function saveTable() {
-  console.log(headers.value[0])
-  console.log(rows.value)
+  for (const row of rows) {
+    // forEach yerine for...of kullanıyoruz
+    for (const [, cellValue] of Object.entries(row)) {
+      const data = {
+        TableId: tableId,
+        InputAreaId: areidCounter,
+        Value: cellValue
+      }
+      console.log(data)
+      try {
+        const response = await axios.post(`http://localhost:5177/api/TablesValues/addrows`, data)
+        console.log(response)
+      } catch (error) {
+        console.error('rows saving failed', error)
+      }
+
+      areidCounter++
+    }
+  }
+
+  allRows.value = [] // allRows'u sıfırla
+}
+
+async function saveTable() {
+  let tableid = ref()
+  try {
+    console.log(sessionStorage.getItem('id'))
+    const table = {
+      TableName: tablename.value,
+      ImageUrl: imagepath + fileName.value
+    }
+    console.log(table)
+    const response = await axios.post(
+      `http://localhost:5177/api/TableInformations/addtable/${sessionStorage.getItem('id')}`,
+      table
+    )
+    console.log(response)
+    tableid.value = response.data.tableId
+  } catch (error) {
+    console.error('save table failed:', error)
+  }
+  console.log(tableid.value)
+  await saveColumns(tableid.value, headers.value)
+
+  console.log(tableid.value)
+  await saveRows(tableid.value, rows.value)
+  try {
+    const response = await axios.get(
+      `http://localhost:5177/api/UserTables/getUserTable/${sessionStorage.getItem('id')}`
+    )
+    tableIds.value = response.data.map((table) => table.tableId)
+    console.log(tableIds.value)
+    router.push({ path: '/listtable', query: { tableIds: JSON.stringify(tableIds.value) } })
+  } catch (error) {
+    console.error('tables returning failed', error)
+  }
 }
 </script>
 

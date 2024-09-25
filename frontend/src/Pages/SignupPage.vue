@@ -7,28 +7,28 @@
         <v-card-text>
           <v-form @submit.prevent="submit">
             <v-text-field
-              v-model="name"
+              v-model="Firstname"
               prepend-inner-icon="mdi-account"
               label="Name"
               type="text"
               required
             ></v-text-field>
             <v-text-field
-              v-model="lastname"
+              v-model="Lastname"
               prepend-inner-icon="mdi-account"
               label="Lastname"
               type="text"
               required
             ></v-text-field>
             <v-text-field
-              v-model="email"
+              v-model="Email"
               prepend-inner-icon="mdi-mail"
               label="Email"
               type="email"
               required
             ></v-text-field>
             <v-text-field
-              v-model="password"
+              v-model="Password"
               prepend-inner-icon="mdi-key"
               label="Password"
               type="password"
@@ -52,20 +52,32 @@
 <script setup>
 import EventBus from '../eventBus.js'
 import { ref } from 'vue'
+import axios from 'axios'
 
-const email = ref('')
-const password = ref('')
-const name = ref('')
-const lastname = ref('')
+const Firstname = ref('')
+const Lastname = ref('')
+const Email = ref('')
+const Password = ref('')
 
 function submit() {
   alert(
-    `Name: ${name.value}, Lastname: ${lastname.value},
-        Email: ${email.value}, Password: ${password.value}`
+    `Name: ${Firstname.value}, Lastname: ${Lastname.value},
+        Email: ${Email.value}, Password: ${Password.value}`
   )
 }
-function handleSignUp() {
-  EventBus.emit('userSignUp')
+async function handleSignUp() {
+  try {
+    const response = await axios.post('http://localhost:5177/api/Auth/signup', {
+      Firstname: Firstname.value,
+      Lastname: Lastname.value,
+      Email: Email.value,
+      Password: Password.value
+    })
+    alert(response.data)
+    EventBus.emit('userSignUp')
+  } catch (error) {
+    console.error('Sign up failed:', error)
+  }
 }
 </script>
 
