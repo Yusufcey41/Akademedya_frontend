@@ -105,7 +105,7 @@ const fetchData = async () => {
       key: column.columnName
       // Tablo verilerini bağlamak için kullanılan anahtar
     }))
-
+    //öpleröerlferplfperlf
     headers.value.push({
       title: 'Actions', // Başlık adı
       key: 'actions', // Slot ile eşleşecek anahtar
